@@ -2,6 +2,26 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import {ApiError} from "../utils/ApiError.js";
 import {user} from "../models/user.model.js";
 import {ApiResponse} from "../utils/ApiResponse.js";
+
+const generateAccessAndRefereshToken = async(userId)=>
+    {
+    try {
+       const User = user.findById(userId)
+       const accessToken = User.generateAccessToken()
+       const refreshToken = User.generateRefreshToken()
+       
+       User.refreshToken = refreshToken
+       await user.Save({validateBeforeSave:false})
+
+       return {accessToken,refreshToken}
+
+    } catch (error) {
+        throw new AppiError(500,"something went wrong while generate and refresh token")
+    }
+
+    }
+
+
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 const registerUser = asyncHandler(async(req,res)=>{
     
@@ -101,12 +121,32 @@ const loginUser = asyncHandler(async(req,res)=>{
         throw new ApiError(401,"password incorrect")
     }
 
-    
+     const {accessToken,refreshToken}=await generateAccessAndRefereshToken(User._id) 
 
+    const loggedInUser = await user.findById(User._id).select("-password -refreshToken")
 
+    const option = {
+         httpOnly:true,
+        secure: true
+    }
+
+    return res.status(200).cookie("accessToken",accessToken,option).cookie("refreshToken",refreshToken,option).json(
+        new ApiResponse(
+            200,
+            {
+              user:  loggedInUser,accessToken,refreshToken 
+            },
+            "User logged In Successfully"
+        )
+    )
+
+    const logoutUser = asyncHandler(async(req, res)=>{
+
+    })
 })
 
 export {
     registerUser,
-    loginUser
+    loginUser,
+    logoutUser
 }
