@@ -6,7 +6,7 @@ import {ApiResponse} from "../utils/ApiResponse.js";
 const generateAccessAndRefereshToken = async(userId)=>
     {
     try {
-       const User = user.findById(userId)
+       const User = await user.findById(userId)
        const accessToken = User.generateAccessToken()
        const refreshToken = User.generateRefreshToken()
        
@@ -16,7 +16,7 @@ const generateAccessAndRefereshToken = async(userId)=>
        return {accessToken,refreshToken}
 
     } catch (error) {
-        throw new AppiError(500,"something went wrong while generate and refresh token")
+        throw new ApiError(500,"something went wrong while generate and refresh token")
     }
 
     }
@@ -121,7 +121,7 @@ const loginUser = asyncHandler(async(req,res)=>{
         throw new ApiError(401,"password incorrect")
     }
 
-     const {accessToken,refreshToken}=await generateAccessAndRefereshToken(User._id) 
+     const {accessToken,refreshToken}= await generateAccessAndRefereshToken(User._id) 
 
     const loggedInUser = await user.findById(User._id).select("-password -refreshToken")
 
