@@ -237,7 +237,7 @@ const changeCurruntPassword = asyncHandler(async(req,res) =>{
 const getCurruntUser = asyncHandler(async(req,res)=>{
     return res 
     .status(200)
-    .json(200,{},"Currunt user fetched succesfully")
+    .json(200,req.User,"Currunt user fetched succesfully")
 })
 
 const updateAccountDetails = asyncHandler(async(req,res)=>{
